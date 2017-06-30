@@ -76,11 +76,18 @@
              :headers {"Content-Type" "text/plain; charset=utf-8"}
              :body    "Not found"})))
 
+(defn wrap-not-found [{:keys [not-found] :as opts}]
+  (let [custom-not-found-handler (:not-found-handler opts)]
+    (if custom-not-found-handler
+      ((u/resolve-sym custom-not-found-handler) opts)
+      (not-found-handler not-found))))
+
 (defn dir-handler [{:keys [dir resource-root not-found]
-                    :or {resource-root ""}}]
+                    :or   {resource-root ""}
+                    :as   opts}]
   (when dir
     (maybe-create-dir! dir)
-    (-> (not-found-handler not-found)
+    (-> (wrap-not-found opts)
       (wrap-resource resource-root)
       (wrap-file dir {:index-files? false})
       (wrap-index dir))))
@@ -100,8 +107,9 @@
         (handler req))))
 
 (defn resources-handler [{:keys [resource-root not-found]
-                          :or   {resource-root ""}}]
-  (-> (not-found-handler not-found)
+                          :or   {resource-root ""}
+                          :as   opts}]
+  (-> (wrap-not-found opts)
       (wrap-index-resource resource-root)
       (wrap-resource resource-root)))
 

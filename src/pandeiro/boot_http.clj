@@ -51,6 +51,7 @@
    R reload             bool "Reload modified namespaces on each request."
    n nrepl         REPL edn  "nREPL server parameters e.g. \"{:port 3001, :bind \"0.0.0.0\"}\""
    N not-found     SYM  sym  "a ring handler for requested resources that aren't in your directory. Useful for pushState."
+   M not-found-handler CODE code ""
    S charset       CHAR str  "charset to use when serving static resources and files. (Default: utf-8)"]
 
   (let [port        (or port default-port)
@@ -84,7 +85,7 @@
                           {:dir ~dir, :port ~port, :handler '~handler,
                            :ssl-props ~ssl-props,
                            :reload '~reload, :env-dirs ~(vec (:directories pod/env)), :httpkit ~httpkit,
-                           :not-found '~not-found,
+                           :not-found '~not-found, :not-found-handler '~not-found-handler
                            :resource-root ~resource-root}))
                        (def nrepl-server
                          (when ~nrepl
